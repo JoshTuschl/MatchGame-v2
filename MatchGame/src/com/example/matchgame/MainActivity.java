@@ -367,7 +367,7 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    // Handle item selection
 	    if (item.getItemId() == R.id.config) {
-	    	Intent i = new Intent(MainActivity.this, FileList.class);
+	    	Intent i = new Intent(MainActivity.this, FileListAct.class);
 			startActivity(i); 
 	    	return true;
 	    }
