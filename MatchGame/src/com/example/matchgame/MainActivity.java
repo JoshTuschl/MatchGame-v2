@@ -1,5 +1,6 @@
 package com.example.matchgame;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Timer;
@@ -8,6 +9,7 @@ import java.util.TimerTask;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -24,6 +26,7 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 	
+
 	private Integer[] images = {R.drawable.clubsace, R.drawable.clubsking, R.drawable.clubsqueen, R.drawable.clubsjack,
 			R.drawable.clubs10, R.drawable.heartsace, R.drawable.heartsking, R.drawable.heartsqueen, R.drawable.heartsjack,
 			R.drawable.hearts10,R.drawable.clubsace, R.drawable.clubsking, R.drawable.clubsqueen, R.drawable.clubsjack,
@@ -43,6 +46,7 @@ public class MainActivity extends Activity {
 	private Handler myHandler;
 	private Timer mytimer;
 	TextView text = null;
+	ArrayList<Uri> imageUris;
 	
 	Chronometer mChronometer;
 	class CustomTimerTask extends TimerTask {
@@ -80,8 +84,9 @@ public class MainActivity extends Activity {
    public void checkForMatch() {
 	   Log.e("checkForMatch", "Checking for match");
 	   if (secondCard.card != null && firstCard.card != null) {
-		   if (getResources().getDrawable(images[firstCard.index]).getConstantState().equals
-            (getResources().getDrawable(images[secondCard.index]).getConstantState())) {
+//		   if (getResources().getDrawable(images[firstCard.index]).getConstantState().equals
+//            (getResources().getDrawable(images[secondCard.index]).getConstantState())) {
+		   if (imageUris.get(firstCard.index).equals(imageUris.get(secondCard.index))) {
 			   matched[firstCard.index] = true;
 			   matched[secondCard.index]= true;
 
@@ -109,7 +114,7 @@ public class MainActivity extends Activity {
    
    public void clicked(int index, ImageButton imgBttn) {
 	   if (matched[index] != true) {
-			imgBttn.setImageResource(images[index]);
+			imgBttn.setImageURI(imageUris.get(index));
 			flipped[index] = true;
 			if (firstCard.card == null) {
 	           	firstCard.card = imgBttn;
@@ -376,6 +381,13 @@ public class MainActivity extends Activity {
 	    }	  
 	}
 	
+	@Override
+	protected void onResume()
+	{
+	super.onResume();
+	setupGame();
+	}
+	
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -390,7 +402,28 @@ public class MainActivity extends Activity {
 	
 	public void setupGame() {
 		
-		Collections.shuffle(Arrays.asList(images));
+		Catalog.get(getApplicationContext());
+		imageUris = Catalog.getCheckedRecordsURIs();
+		if (imageUris.size() == 0) {
+			imageUris = Catalog.getCheckedRecordsUrisAtStartup();						
+		}
+		else if (imageUris.size() < 10) {
+			int neededImages = 10 - imageUris.size();
+			for (int i = 0; i < neededImages; i++) {
+				imageUris.add(imageUris.get(0));
+			}
+			
+		}
+		else {
+			int extraImages = imageUris.size() - 10;
+			for (int i = extraImages; i > 0; i--) {
+				imageUris.remove(imageUris.get(i));
+			}
+		}
+		for (int i = 0; i < 10; i++) {
+			imageUris.add(imageUris.get(i));
+		}
+		Collections.shuffle(imageUris);
 		
 		for (int i = 0; i < 20; i++) {
 			flipped[i] = false;
